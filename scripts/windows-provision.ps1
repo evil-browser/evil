@@ -44,23 +44,61 @@ try {
     Write-Warn "could not add exclusion: $($_.Exception.Message)"
 }
 
-Write-Step "Package manager"
-$winget = Get-Command winget -ErrorAction SilentlyContinue
-if (-not $winget) { Fail "winget not found. Install App Installer from the Microsoft Store, or install git, python and Visual Studio by hand." }
-Write-Info "winget $(winget --version)"
+$script:Downloads = Join-Path $env:TEMP "evil-provision"
+New-Item -ItemType Directory -Force -Path $script:Downloads | Out-Null
 
-function Install-IfMissing($id, $exe, $label) {
-    if (Get-Command $exe -ErrorAction SilentlyContinue) {
-        Write-Info "$label already present"
-        return
-    }
-    Write-Info "installing $label"
-    winget install --id $id --silent --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
+function Get-Installer($url, $name) {
+    $out = Join-Path $script:Downloads $name
+    if (Test-Path $out) { Write-Info "$name already downloaded"; return $out }
+    Write-Info "downloading $name"
+    Invoke-WebRequest -Uri $url -OutFile $out -UseBasicParsing
+    return $out
 }
 
-Write-Step "Git and Python"
-Install-IfMissing "Git.Git" "git" "git"
-Install-IfMissing "Python.Python.3.12" "python" "python 3.12"
+function Invoke-Installer($path, $arguments, $label) {
+    Write-Info "installing $label"
+    $p = Start-Process -FilePath $path -ArgumentList $arguments -Wait -PassThru -NoNewWindow
+    if ($p.ExitCode -ne 0 -and $p.ExitCode -ne 3010) {
+        Write-Warn "$label exited with $($p.ExitCode)"
+    }
+    return $p.ExitCode
+}
+
+Write-Step "Package manager"
+$useWinget = [bool](Get-Command winget -ErrorAction SilentlyContinue)
+if ($useWinget) {
+    Write-Info "winget $(winget --version)"
+} else {
+    Write-Info "no winget (normal on Windows Server), using direct downloads"
+}
+
+Write-Step "Git"
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    Write-Info "already present"
+} elseif ($useWinget) {
+    winget install --id Git.Git --silent --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
+} else {
+    $rel = Invoke-RestMethod "https://api.github.com/repos/git-for-windows/git/releases/latest" -UseBasicParsing
+    $asset = $rel.assets | Where-Object { $_.name -like "Git-*-64-bit.exe" } | Select-Object -First 1
+    $exe = Get-Installer $asset.browser_download_url $asset.name
+    Invoke-Installer $exe '/VERYSILENT /NORESTART /NOCANCEL /SP- /SUPPRESSMSGBOXES /o:PathOption=CmdTools /o:EnableSymlinks=Enabled' "git" | Out-Null
+}
+
+Write-Step "Python"
+$pythonOk = $false
+$py = Get-Command python -ErrorAction SilentlyContinue
+if ($py) {
+    $v = & $py.Source --version 2>&1
+    if ($v -match "Python 3\.(9|1[0-9])") { $pythonOk = $true; Write-Info "$v already present" }
+}
+if (-not $pythonOk) {
+    if ($useWinget) {
+        winget install --id Python.Python.3.12 --silent --accept-package-agreements --accept-source-agreements --disable-interactivity | Out-Null
+    } else {
+        $exe = Get-Installer "https://www.python.org/ftp/python/3.12.7/python-3.12.7-amd64.exe" "python-3.12.7-amd64.exe"
+        Invoke-Installer $exe '/quiet InstallAllUsers=1 PrependPath=1 Include_test=0 Include_doc=0' "python 3.12" | Out-Null
+    }
+}
 
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" +
             [System.Environment]::GetEnvironmentVariable("Path", "User")
@@ -76,22 +114,29 @@ if (-not $SkipVisualStudio) {
         if ($found) { $installed = $true; Write-Info "found at $found" }
     }
     if (-not $installed) {
-        Write-Info "installing, this downloads several GB and takes a while"
-        $components = @(
-            "Microsoft.VisualStudio.Workload.VCTools"
-            "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
-            "Microsoft.VisualStudio.Component.VC.ATL"
-            "Microsoft.VisualStudio.Component.VC.ATLMFC"
-            "Microsoft.VisualStudio.Component.Windows11SDK.22621"
-        ) | ForEach-Object { "--add", $_ }
-        winget install --id Microsoft.VisualStudio.2022.BuildTools --silent `
-            --accept-package-agreements --accept-source-agreements --disable-interactivity `
-            --override "--quiet --wait --norestart --nocache $($components -join ' ') --includeRecommended" | Out-Null
-        Write-Info "installed"
+        Write-Info "this downloads several GB and takes a while"
+        $exe = Get-Installer "https://aka.ms/vs/17/release/vs_BuildTools.exe" "vs_BuildTools.exe"
+        $vsArgs = @(
+            "--quiet", "--wait", "--norestart", "--nocache"
+            "--add", "Microsoft.VisualStudio.Workload.VCTools"
+            "--add", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64"
+            "--add", "Microsoft.VisualStudio.Component.VC.ATL"
+            "--add", "Microsoft.VisualStudio.Component.VC.ATLMFC"
+            "--add", "Microsoft.VisualStudio.Component.Windows11SDK.22621"
+            "--includeRecommended"
+        )
+        Invoke-Installer $exe ($vsArgs -join ' ') "Visual Studio Build Tools" | Out-Null
     }
-    Write-Warn "Debugging Tools for Windows is required and winget cannot add it."
-    Write-Warn "Open the Windows SDK entry in Apps > Installed apps > Modify, and tick"
-    Write-Warn "'Debugging Tools for Windows'. Chromium will not link without it."
+
+    Write-Step "Debugging Tools for Windows"
+    $dbg = "${env:ProgramFiles(x86)}\Windows Kits\10\Debuggers\x64\cdb.exe"
+    if (Test-Path $dbg) {
+        Write-Info "already present"
+    } else {
+        $exe = Get-Installer "https://go.microsoft.com/fwlink/?linkid=2196241" "winsdksetup.exe"
+        Invoke-Installer $exe '/features OptionId.WindowsDesktopDebuggers /quiet /norestart /ceip off' "Debugging Tools" | Out-Null
+        if (Test-Path $dbg) { Write-Info "installed" } else { Write-Warn "still missing; Chromium will not link without it" }
+    }
 }
 
 Write-Step "Environment"
