@@ -60,19 +60,45 @@ Reboot afterwards if long paths were only just enabled.
 
 ## Build
 
-The build scripts are bash. Use **Git Bash**, not PowerShell or cmd.
+Windows uses its own driver, `scripts/windows-build.ps1`, not the bash scripts
+and Makefile the other platforms use. Two reasons: Git Bash ships no `make`, and
+Chromium's own documentation warns against running depot_tools under MSYS, where
+its path handling misbehaves. The PowerShell driver runs `fetch`, `gclient`,
+`gn` and `autoninja` natively through cmd, and calls the same cross-platform
+Python tooling for patching.
 
-```sh
-cd /c/evil
-make bootstrap
-make sync
-make upstream
-make patch
-scripts/build.sh --target mini_installer
-make package
+From **PowerShell** in the repository root:
+
+```powershell
+.\scripts\windows-build.ps1 -Stage all
 ```
 
-`make package` produces `dist/evil-<version>-x64.exe` and a portable `.zip`.
+Or one stage at a time, which is what you want the first time through:
+
+```powershell
+.\scripts\windows-build.ps1 -Stage bootstrap
+.\scripts\windows-build.ps1 -Stage sync
+.\scripts\windows-build.ps1 -Stage upstream
+.\scripts\windows-build.ps1 -Stage patch
+.\scripts\windows-build.ps1 -Stage build -Jobs 8
+.\scripts\windows-build.ps1 -Stage package
+```
+
+Each stage appends to `build-status.txt`, so a detached run can be followed
+without attaching to its console. `-Stage package` produces
+`dist\evil-<version>-x64.exe`, a portable `.zip`, and `SHA256SUMS`.
+
+For an unattended run, register it as a scheduled task so it survives your
+session disconnecting:
+
+```powershell
+$a = New-ScheduledTaskAction -Execute 'powershell.exe' `
+  -Argument '-NoProfile -ExecutionPolicy Bypass -File D:\evil\scripts\windows-build.ps1 -Stage all'
+$p = New-ScheduledTaskPrincipal -UserId SYSTEM -LogonType ServiceAccount -RunLevel Highest
+$s = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::FromHours(72)) -StartWhenAvailable
+Register-ScheduledTask -TaskName evilbuild -Action $a -Principal $p -Settings $s
+Start-ScheduledTask -TaskName evilbuild
+```
 
 ## Known annoyances
 
