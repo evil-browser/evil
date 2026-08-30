@@ -49,7 +49,13 @@ else
   PY_VER="$("$NEWEST_PY" -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
   CUR_VER="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || echo 0.0)"
   if [[ "$(printf '%s\n3.9\n' "$CUR_VER" | sort -V | head -1)" != "3.9" ]]; then
-    echo "    python3 points at $CUR_VER, repointing at $PY_VER"
+    echo "    python3 points at $CUR_VER, trying the highest-priority alternative first"
+    alternatives --auto python3 >/dev/null 2>&1 || true
+    CUR_VER="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || echo 0.0)"
+  fi
+  if [[ "$(printf '%s\n3.9\n' "$CUR_VER" | sort -V | head -1)" != "3.9" ]]; then
+    echo "    still $CUR_VER, repointing at $PY_VER"
+    echo "    WARNING: this changes the system python3 for every user on this host"
     alternatives --install /usr/bin/python3 python3 "$(command -v "$NEWEST_PY")" 50 >/dev/null 2>&1 || true
     alternatives --set python3 "$(command -v "$NEWEST_PY")"
   fi

@@ -78,7 +78,7 @@ you control — see [RELEASING.md](RELEASING.md).
 | --- | --- | --- |
 | Linux x86_64 | The VPS | The default |
 | Linux aarch64 | Same VPS | `scripts/build.sh --cpu arm64`, sysroot comes from gclient |
-| Windows x64 | A Windows machine or VM | Visual Studio 2022, `DEPOT_TOOLS_WIN_TOOLCHAIN=0` |
+| Windows x64 | A Windows instance | `scripts/windows-provision.ps1`, see [building/windows.md](building/windows.md) |
 | macOS | Real Apple hardware | Xcode is required and cannot be licensed on a Linux VPS |
 
 Anyone offering "macOS in the cloud" for this is renting you a Mac mini. That is
