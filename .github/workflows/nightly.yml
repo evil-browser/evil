@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   nightly:
-    if: github.repository == 'evil-browser/evil'
+    if: github.repository == 'evil-browser/evil' && vars.SELF_HOSTED_READY == 'true'
     strategy:
       fail-fast: false
       matrix:
