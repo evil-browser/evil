@@ -11,19 +11,40 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-if ! command -v apt-get >/dev/null 2>&1; then
-  echo "error: this script targets Debian and Ubuntu. On other distributions" >&2
-  echo "       install the equivalents listed in docs/VPS.md by hand." >&2
+if command -v apt-get >/dev/null 2>&1; then
+  PKG=apt
+elif command -v dnf >/dev/null 2>&1; then
+  PKG=dnf
+else
+  echo "error: need apt-get or dnf. On other distributions install the" >&2
+  echo "       equivalents listed in docs/VPS.md by hand." >&2
   exit 1
 fi
 
-echo "==> System packages"
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get install -y --no-install-recommends \
-  git curl ca-certificates python3 python3-venv python3-pip \
-  build-essential pkg-config ninja-build lsb-release xz-utils zip unzip \
-  ccache tmux htop rsync file sudo gnupg patch quilt
+echo "==> System packages ($PKG)"
+if [[ "$PKG" == "apt" ]]; then
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq
+  apt-get install -y --no-install-recommends \
+    git curl ca-certificates python3 python3-venv python3-pip \
+    build-essential pkg-config ninja-build lsb-release xz-utils zip unzip \
+    ccache tmux htop rsync file sudo gnupg patch
+else
+  dnf install -y -q epel-release || true
+  dnf install -y -q \
+    git curl ca-certificates python3 python3-pip \
+    gcc gcc-c++ make pkgconf-pkg-config xz zip unzip \
+    tmux rsync file sudo gnupg2 patch libatomic perl
+  dnf install -y -q ccache || echo "    ccache unavailable, continuing without it"
+  PY_VER="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
+  if [[ "$(printf '%s\n3.9\n' "$PY_VER" | sort -V | head -1)" != "3.9" ]]; then
+    echo "error: Chromium needs Python 3.9 or newer, found $PY_VER" >&2
+    echo "       dnf install python3.12 && alternatives --set python3 /usr/bin/python3.12" >&2
+    exit 1
+  fi
+  echo "    python3 $PY_VER"
+  echo "    ninja comes from depot_tools, not the distribution"
+fi
 
 echo "==> Build user"
 if ! id -u "$BUILD_USER" >/dev/null 2>&1; then
@@ -59,9 +80,14 @@ if [[ "$FREE_GB" -lt 150 ]]; then
 fi
 
 echo "==> ccache"
+if ! command -v ccache >/dev/null 2>&1; then
+  echo "    not installed, skipping"
+else
 sudo -u "$BUILD_USER" ccache --max-size="${CCACHE_GB}G" >/dev/null
 sudo -u "$BUILD_USER" ccache --set-config=compression=true
 sudo -u "$BUILD_USER" ccache --set-config=sloppiness=include_file_mtime,include_file_ctime,time_macros
+
+fi
 
 echo "==> File descriptor limits"
 if ! grep -q 'evil build limits' /etc/security/limits.conf; then
@@ -74,6 +100,19 @@ LIMITS
 fi
 
 CORES=$(nproc)
+LINK_JOBS=$(( TOTAL_RAM_GB / 8 ))
+[[ "$LINK_JOBS" -lt 1 ]] && LINK_JOBS=1
+
+echo
+echo "==> Build sizing"
+echo "    compile jobs:  $CORES"
+echo "    link jobs:     $LINK_JOBS  (linking needs roughly 8 GB each)"
+if [[ "$TOTAL_RAM_GB" -lt 24 ]]; then
+  echo "    NOTE: under 24 GB, disable ThinLTO for the first build:"
+  echo "          echo 'use_thin_lto = false' >> build/args/local.gni"
+  echo "          echo 'concurrent_links = 1' >> build/args/local.gni"
+fi
+
 echo
 echo "==> Ready"
 echo "    user:     $BUILD_USER"
