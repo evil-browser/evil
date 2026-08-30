@@ -1,0 +1,133 @@
+:root {
+  --bg: #0a0a0a;
+  --panel: #141414;
+  --panel-2: #1c1c1c;
+  --line: rgba(255, 255, 255, 0.12);
+  --line-2: rgba(255, 255, 255, 0.2);
+  --text: #f2f2f2;
+  --dim: #8a8a8a;
+  --dimmer: #6a6a6a;
+  --white: #fff;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--white); text-decoration: none; border-bottom: 1px solid var(--dimmer); }
+.wrap { padding: 16px; }
+.head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.head svg { width: 22px; height: 22px; flex: 0 0 auto; }
+.head h1 { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; }
+.head .sub { margin-left: auto; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dimmer); }
+h2 {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--dimmer);
+  font-weight: 500;
+  margin: 22px 0 10px;
+}
+h2:first-of-type { margin-top: 0; }
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--line);
+}
+.row:last-child { border-bottom: none; }
+.row .label { flex: 1; min-width: 0; }
+.row .label b { display: block; font-weight: 600; font-size: 13px; }
+.row .label span { display: block; color: var(--dim); font-size: 11.5px; margin-top: 2px; }
+.switch { position: relative; width: 38px; height: 22px; flex: 0 0 auto; }
+.switch input { position: absolute; opacity: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; z-index: 2; }
+.switch i {
+  position: absolute;
+  inset: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  transition: background 0.25s, border-color 0.25s;
+}
+.switch i::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: transform 0.25s var(--ease), background 0.25s;
+}
+.switch input:checked + i { background: var(--white); border-color: var(--white); }
+.switch input:checked + i::after { transform: translateX(16px); background: #000; }
+.switch input:focus-visible + i { outline: 2px solid var(--white); outline-offset: 2px; }
+select, input[type="text"] {
+  background: var(--panel-2);
+  border: 1px solid var(--line-2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font: inherit;
+  min-width: 130px;
+}
+select:focus, input[type="text"]:focus { outline: none; border-color: var(--white); }
+.btn {
+  background: transparent;
+  border: 1px solid var(--line-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.25s, border-color 0.25s, color 0.25s;
+}
+.btn:hover { border-color: var(--white); background: rgba(255, 255, 255, 0.07); }
+.btn--primary { background: var(--white); color: #000; border-color: var(--white); font-weight: 600; }
+.btn--primary:hover { background: transparent; color: var(--white); }
+.btn--wide { width: 100%; padding: 12px; }
+.note {
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--white);
+  border-radius: 0 10px 10px 0;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 12px 14px;
+  color: var(--dim);
+  font-size: 12px;
+  margin: 16px 0;
+}
+.note b { color: var(--text); }
+.pillrow { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: var(--dim);
+}
+.tag--bad { color: #fff; border-color: #fff; }
+.list { border-top: 1px solid var(--line); }
+.empty { color: var(--dimmer); font-size: 12px; padding: 14px 0; }
+.foot {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.foot .spacer { flex: 1; }

@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in the browser is broken
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security vulnerabilities do **not** go here — see
+        [SECURITY.md](https://github.com/evil-browser/evil/blob/main/SECURITY.md).
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The full contents of `evil://version`
+      placeholder: "1.0.0 · Chromium 141.0.7390.65 · patches 3f9a1c2"
+    validations: { required: true }
+
+  - type: dropdown
+    id: channel
+    attributes:
+      label: Channel
+      options: [Stable, Beta, Nightly, Built from source]
+    validations: { required: true }
+
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: "Ubuntu 24.04 / macOS 14.5 / Windows 11 23H2"
+    validations: { required: true }
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open …
+        2. Click …
+        3. Observe …
+    validations: { required: true }
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations: { required: true }
+
+  - type: checkboxes
+    id: isolation
+    attributes:
+      label: Isolation
+      description: These four answers resolve most reports on their own.
+      options:
+        - label: Still happens with shields off for the site (`Alt`+`S`)
+        - label: Still happens with `--no-fingerprint-noise`
+        - label: Still happens in a fresh profile (`--user-data-dir=/tmp/test`)
+        - label: Also happens in stock Chromium of the same version

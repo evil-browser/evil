@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "evil Clean",
+  "version": "1.0.0",
+  "description": "Burn browsing data on demand, on a schedule, or at startup.",
+  "minimum_chrome_version": "120",
+  "permissions": ["browsingData", "storage", "alarms", "notifications"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": {
+    "default_title": "evil Clean",
+    "default_popup": "ui/popup.html",
+    "default_icon": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" }
+  },
+  "options_page": "ui/options.html",
+  "icons": { "16": "icons/16.png", "32": "icons/32.png", "48": "icons/48.png", "128": "icons/128.png" },
+  "commands": {
+    "burn": {
+      "suggested_key": { "default": "Alt+Shift+X", "mac": "Alt+Shift+X" },
+      "description": "Burn browsing data now"
+    }
+  }
+}

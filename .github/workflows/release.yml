@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.repository == 'evil-browser/evil'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            cpu: x64
+          - os: linux
+            cpu: arm64
+          - os: macos
+            cpu: x64
+          - os: macos
+            cpu: arm64
+          - os: windows
+            cpu: x64
+    runs-on: [self-hosted, "${{ matrix.os }}", chromium-checkout]
+    timeout-minutes: 480
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Clean build from the pinned tree
+        run: |
+          make distclean
+          EVIL_ASSUME_YES=1 make sync
+          make patch
+          scripts/build.sh --config release --cpu ${{ matrix.cpu }}
+
+      - run: make test
+      - run: make package && make checksums
+
+      - name: Sign artefacts
+        run: scripts/sign.sh --config release
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_NOTARY_PROFILE: ${{ secrets.APPLE_NOTARY_PROFILE }}
+          WINDOWS_CERT_THUMBPRINT: ${{ secrets.WINDOWS_CERT_THUMBPRINT }}
+          GPG_KEY_ID: ${{ secrets.GPG_KEY_ID }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evil-${{ matrix.os }}-${{ matrix.cpu }}
+          path: dist/
+
+  publish:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Combine checksums
+        run: cat dist/SHA256SUMS* | sort -k2 > dist/SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          draft: true          # a human checks the checksums before it goes live
+          generate_release_notes: true

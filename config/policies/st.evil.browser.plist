@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>MetricsReportingEnabled</key><false/>
+  <key>ChromeVariations</key><integer>2</integer>
+  <key>DomainReliabilityAllowed</key><false/>
+  <key>UrlKeyedAnonymizedDataCollectionEnabled</key><false/>
+  <key>SafeBrowsingProtectionLevel</key><integer>0</integer>
+  <key>SafeBrowsingExtendedReportingEnabled</key><false/>
+  <key>SearchSuggestEnabled</key><false/>
+  <key>SpellCheckServiceEnabled</key><false/>
+  <key>TranslateEnabled</key><false/>
+  <key>AlternateErrorPagesEnabled</key><false/>
+  <key>NetworkPredictionOptions</key><integer>2</integer>
+  <key>BrowserSignin</key><integer>0</integer>
+  <key>SyncDisabled</key><true/>
+  <key>BackgroundModeEnabled</key><false/>
+  <key>EnableMediaRouter</key><false/>
+  <key>PromotionalTabsEnabled</key><false/>
+  <key>AutofillCreditCardEnabled</key><false/>
+  <key>PasswordLeakDetectionEnabled</key><false/>
+  <key>PrivacySandboxAdTopicsEnabled</key><false/>
+  <key>PrivacySandboxSiteEnabledAdsEnabled</key><false/>
+  <key>PrivacySandboxAdMeasurementEnabled</key><false/>
+  <key>PrivacySandboxPromptEnabled</key><false/>
+  <key>DefaultSearchProviderEnabled</key><true/>
+  <key>DefaultSearchProviderName</key><string>DuckDuckGo</string>
+  <key>DefaultSearchProviderKeyword</key><string>duck.com</string>
+  <key>DefaultSearchProviderSearchURL</key><string>https://duckduckgo.com/?q={searchTerms}&amp;t=evil</string>
+  <key>DefaultSearchProviderIconURL</key><string>https://duckduckgo.com/favicon.ico</string>
+  <key>DefaultSearchProviderEncodings</key><array><string>UTF-8</string></array>
+  <key>DefaultGeolocationSetting</key><integer>2</integer>
+  <key>DefaultNotificationsSetting</key><integer>2</integer>
+  <key>DnsOverHttpsMode</key><string>automatic</string>
+  <key>ExtensionManifestV2Availability</key><integer>2</integer>
+  <key>HardwareAccelerationModeEnabled</key><true/>
+</dict>
+</plist>

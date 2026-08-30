@@ -1,0 +1,45 @@
+{
+  "manifest_version": 3,
+  "name": "evil dark",
+  "short_name": "evil dark",
+  "version": "1.0.0",
+  "description": "Monochrome theme for evil.",
+  "theme": {
+    "colors": {
+      "frame": [8, 8, 8],
+      "frame_inactive": [8, 8, 8],
+      "frame_incognito": [0, 0, 0],
+      "frame_incognito_inactive": [0, 0, 0],
+      "background_tab": [8, 8, 8],
+      "background_tab_inactive": [8, 8, 8],
+      "background_tab_incognito": [0, 0, 0],
+      "toolbar": [26, 26, 26],
+      "toolbar_button_icon": [226, 226, 226],
+      "tab_text": [245, 245, 245],
+      "tab_background_text": [150, 150, 150],
+      "tab_background_text_inactive": [110, 110, 110],
+      "tab_background_text_incognito": [150, 150, 150],
+      "bookmark_text": [214, 214, 214],
+      "omnibox_background": [38, 38, 38],
+      "omnibox_text": [242, 242, 242],
+      "button_background": [26, 26, 26],
+      "ntp_background": [10, 10, 10],
+      "ntp_header": [26, 26, 26],
+      "ntp_text": [235, 235, 235],
+      "ntp_link": [255, 255, 255],
+      "toolbar_text": [242, 242, 242]
+    },
+    "tints": {
+      "buttons": [-1.0, -1.0, -1.0],
+      "frame": [-1.0, -1.0, -1.0],
+      "frame_inactive": [-1.0, -1.0, -1.0],
+      "frame_incognito": [-1.0, -1.0, -1.0],
+      "background_tab": [-1.0, -1.0, -1.0]
+    },
+    "properties": {
+      "ntp_background_alignment": "center",
+      "ntp_background_repeat": "no-repeat",
+      "ntp_logo_alternate": 1
+    }
+  }
+}

@@ -1,0 +1,28 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "user-agent", "operation": "set", "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" },
+        { "header": "sec-ch-ua-platform", "operation": "set", "value": "\"Windows\"" },
+        { "header": "sec-ch-ua-platform-version", "operation": "set", "value": "\"15.0.0\"" },
+        { "header": "sec-ch-ua-arch", "operation": "set", "value": "\"x86\"" },
+        { "header": "sec-ch-ua-bitness", "operation": "set", "value": "\"64\"" },
+        { "header": "sec-ch-ua-model", "operation": "set", "value": "\"\"" },
+        { "header": "sec-ch-ua", "operation": "set", "value": "\"Chromium\";v=\"141\", \"Google Chrome\";v=\"141\", \"Not?A_Brand\";v=\"24\"" },
+        { "header": "sec-ch-ua-full-version", "operation": "set", "value": "\"141.0.0.0\"" },
+        { "header": "x-client-data", "operation": "remove" }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*",
+      "resourceTypes": [
+        "main_frame", "sub_frame", "stylesheet", "script", "image", "font",
+        "object", "xmlhttprequest", "ping", "csp_report", "media",
+        "websocket", "webtransport", "webbundle", "other"
+      ]
+    }
+  }
+]

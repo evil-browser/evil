@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "evil Shield",
+  "version": "1.0.0",
+  "description": "Fingerprint randomization and platform masquerade.",
+  "minimum_chrome_version": "120",
+  "permissions": [
+    "storage",
+    "scripting",
+    "declarativeNetRequestWithHostAccess",
+    "webNavigation"
+  ],
+  "optional_permissions": ["userScripts"],
+  "host_permissions": ["<all_urls>"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "action": {
+    "default_title": "evil Shield",
+    "default_popup": "ui/popup.html",
+    "default_icon": {
+      "16": "icons/16.png",
+      "32": "icons/32.png",
+      "48": "icons/48.png",
+      "128": "icons/128.png"
+    }
+  },
+  "options_page": "ui/options.html",
+  "icons": {
+    "16": "icons/16.png",
+    "32": "icons/32.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      { "id": "linux", "enabled": true, "path": "rules/linux.json" },
+      { "id": "windows", "enabled": false, "path": "rules/windows.json" },
+      { "id": "macos", "enabled": false, "path": "rules/macos.json" }
+    ]
+  },
+  "web_accessible_resources": [
+    { "resources": ["page/*.js"], "matches": ["<all_urls>"] }
+  ]
+}

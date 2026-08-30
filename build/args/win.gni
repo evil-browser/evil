@@ -1,0 +1,6 @@
+target_os = "win"
+is_clang = true
+use_lld = true
+
+enable_swiftshader = true
+com_init_check_hook_disabled = true

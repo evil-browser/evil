@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/evil-browser/evil/security/advisories/new
+    about: Report privately. Never in a public issue.
+  - name: Question about using evil
+    url: https://evil.st/faq.html
+    about: The FAQ and docs answer most of them.
+  - name: Website bug
+    url: https://github.com/evil-browser/evil.st/issues
+    about: Problems with evil.st itself go in the website repository.

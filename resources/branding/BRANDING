@@ -1,0 +1,12 @@
+COMPANY_FULLNAME=The evil browser authors
+COMPANY_SHORTNAME=evil
+PRODUCT_FULLNAME=evil
+PRODUCT_SHORTNAME=evil
+PRODUCT_INSTALLER_FULLNAME=evil Installer
+PRODUCT_INSTALLER_SHORTNAME=evil Installer
+COPYRIGHT=Copyright 2026 The evil browser authors. All rights reserved.
+MAC_BUNDLE_ID=st.evil.browser
+MAC_CREATOR_CODE=EVIL
+MAC_TEAM_ID=
+UPDATE_SCHEME=evil
+GRIT_PRODUCT_NAME=evil

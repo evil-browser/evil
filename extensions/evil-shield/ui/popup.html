@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="ui.css">
+<style>body { width: 320px; }</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <svg viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke-linecap="butt" stroke-linejoin="miter"><path d="M451.63 214.42A200 200 0 1 1 317.80 65.79" stroke="#fff" stroke-width="44"/><path d="M330.92 70.56A200 200 0 0 1 448.25 200.87" stroke="#b3b3b3" stroke-width="44"/><path d="M216 182L296 256L216 330" stroke="#fff" stroke-width="44"/></g></svg>
+    <h1>Shield</h1>
+    <span class="sub" id="state">on</span>
+  </div>
+
+  <div class="row">
+    <span class="label"><b>Protection</b><span>Randomization and masquerade</span></span>
+    <label class="switch"><input type="checkbox" id="enabled"><i></i></label>
+  </div>
+
+  <div class="row">
+    <span class="label"><b>Appear as</b><span id="uaHint">Platform reported to sites</span></span>
+    <select id="profile">
+      <option value="windows">Windows</option>
+      <option value="linux">Linux</option>
+      <option value="macos">macOS</option>
+      <option value="native">Real platform</option>
+    </select>
+  </div>
+
+  <div class="row">
+    <span class="label"><b>Allow this site</b><span id="host">—</span></span>
+    <label class="switch"><input type="checkbox" id="exception"><i></i></label>
+  </div>
+
+  <div class="foot">
+    <button class="btn" id="options">All settings</button>
+    <span class="spacer"></span>
+    <button class="btn btn--primary" id="reload">Reload page</button>
+  </div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>

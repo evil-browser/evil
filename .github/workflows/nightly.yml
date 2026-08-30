@@ -1,0 +1,54 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  nightly:
+    if: github.repository == 'evil-browser/evil'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [linux, macos, windows]
+    runs-on: [self-hosted, "${{ matrix.os }}", chromium-checkout]
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tag for this nightly
+        id: tag
+        run: echo "tag=nightly-$(date -u +%Y%m%d)-$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - run: EVIL_ASSUME_YES=1 make sync && make patch && make build && make package && make checksums
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          prerelease: true
+          files: dist/*
+          body: |
+            Automated nightly from the tip of `main`. Built against Chromium
+            `${{ hashFiles('CHROMIUM_VERSION') && '' }}`— see `CHROMIUM_VERSION`.
+
+            Nightlies are frequently broken and are pruned after 30 days.
+            Reproduce bugs on beta before reporting them.
+
+  prune:
+    needs: nightly
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete nightlies older than 30 days
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cutoff=$(date -u -d '30 days ago' +%Y-%m-%d 2>/dev/null || date -u -v-30d +%Y-%m-%d)
+          gh release list --limit 200 --json tagName,createdAt,isPrerelease \
+            --jq ".[] | select(.isPrerelease and (.tagName | startswith(\"nightly-\")) and (.createdAt < \"$cutoff\")) | .tagName" \
+            | while read -r tag; do echo "deleting $tag"; gh release delete "$tag" --yes --cleanup-tag; done

@@ -1,0 +1,9 @@
+is_debug = false
+is_official_build = true          # implies ThinLTO, PGO and optimisation for size
+dcheck_always_on = false
+symbol_level = 0
+blink_symbol_level = 0
+v8_symbol_level = 0
+is_component_build = false
+use_thin_lto = true
+strip_debug_info = true

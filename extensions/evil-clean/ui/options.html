@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>evil Clean</title>
+<link rel="stylesheet" href="ui.css">
+<style>body { max-width: 720px; margin: 0 auto; } .wrap { padding: 32px 24px 60px; }</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <svg viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke-linecap="butt" stroke-linejoin="miter"><path d="M451.63 214.42A200 200 0 1 1 317.80 65.79" stroke="#fff" stroke-width="44"/><path d="M330.92 70.56A200 200 0 0 1 448.25 200.87" stroke="#b3b3b3" stroke-width="44"/><path d="M216 182L296 256L216 330" stroke="#fff" stroke-width="44"/></g></svg>
+    <h1>evil Clean</h1>
+    <span class="sub" id="last">never</span>
+  </div>
+
+  <button class="btn btn--primary btn--wide" id="burn">Burn everything now</button>
+
+  <h2>What a burn clears</h2>
+  <div class="list" id="types"></div>
+
+  <h2>Automatic</h2>
+  <div class="row">
+    <span class="label"><b>Burn at startup</b><span>Clear everything when the browser opens</span></span>
+    <label class="switch"><input type="checkbox" id="cleanOnStartup"><i></i></label>
+  </div>
+  <div class="row">
+    <span class="label"><b>Burn on a schedule</b><span>Repeat automatically while the browser runs</span></span>
+    <select id="intervalMinutes">
+      <option value="0">Off</option>
+      <option value="15">Every 15 minutes</option>
+      <option value="30">Every 30 minutes</option>
+      <option value="60">Every hour</option>
+      <option value="240">Every 4 hours</option>
+      <option value="720">Every 12 hours</option>
+    </select>
+  </div>
+  <div class="row">
+    <span class="label"><b>Notify after a burn</b><span>A silent notification confirming what was cleared</span></span>
+    <label class="switch"><input type="checkbox" id="notify"><i></i></label>
+  </div>
+
+  <h2>Keep these sites</h2>
+  <div class="row">
+    <span class="label"><b>Exceptions</b><span>Cookies and storage for these hosts survive a burn. History and downloads are cleared regardless.</span></span>
+  </div>
+  <div class="row">
+    <input type="text" id="keepInput" placeholder="example.com" style="flex:1">
+    <button class="btn" id="addKeep">Add</button>
+  </div>
+  <div class="list" id="keep"></div>
+
+  <div class="note">
+    <b>Shortcut.</b> <b>Alt</b> + <b>Shift</b> + <b>X</b> burns without opening anything.
+    Saved passwords are excluded by default; enable them above if you want them gone too.
+  </div>
+
+  <div class="foot">
+    <button class="btn" id="reset">Reset to defaults</button>
+    <span class="spacer"></span>
+    <a href="https://evil.st/docs#burn" target="_blank" rel="noopener">Documentation</a>
+  </div>
+</div>
+<script src="options.js"></script>
+</body>
+</html>

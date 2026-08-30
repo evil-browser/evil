@@ -1,0 +1,16 @@
+target_os = "linux"
+use_sysroot = true                # build against the pinned sysroot, not the host's
+is_clang = true
+use_lld = true
+use_custom_libcxx = true
+
+use_pulseaudio = true
+use_alsa = true
+rtc_use_pipewire = true           # screen sharing under Wayland
+use_gio = true
+use_glib = true
+
+use_ozone = true
+ozone_platform = "x11"            # default; Wayland is selected at runtime
+ozone_platform_wayland = true
+ozone_platform_x11 = true

@@ -1,0 +1,20 @@
+evil
+====
+
+This product includes software developed by The Chromium Authors
+(https://www.chromium.org/), licensed under the BSD 3-Clause License. The
+Chromium source is not redistributed in this repository; it is fetched at build
+time and the patches in `patches/` are applied on top of it.
+
+Third-party components pulled in during the build carry their own licences.
+The complete set for a given build is generated into
+`out/<config>/gen/components/resources/about_credits.html` and is viewable in
+the shipped browser at `evil://credits`.
+
+The evil name, logo and other brand assets in `resources/branding/` are not
+covered by the BSD licence above. See `resources/branding/README.md`.
+
+Widevine, where included in official builds, is proprietary software licensed
+from Google and is not part of this source tree.
+
+evil is not affiliated with, endorsed by, or sponsored by Google.

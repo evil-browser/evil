@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>evil Shield</title>
+<link rel="stylesheet" href="ui.css">
+<style>body { max-width: 720px; margin: 0 auto; } .wrap { padding: 32px 24px 60px; }</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <svg viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke-linecap="butt" stroke-linejoin="miter"><path d="M451.63 214.42A200 200 0 1 1 317.80 65.79" stroke="#fff" stroke-width="44"/><path d="M330.92 70.56A200 200 0 0 1 448.25 200.87" stroke="#b3b3b3" stroke-width="44"/><path d="M216 182L296 256L216 330" stroke="#fff" stroke-width="44"/></g></svg>
+    <h1>evil Shield</h1>
+    <span class="sub" id="state">on</span>
+  </div>
+
+  <h2>Master</h2>
+  <div class="row">
+    <span class="label"><b>Protection enabled</b><span>Turning this off disables every defence below</span></span>
+    <label class="switch"><input type="checkbox" id="enabled"><i></i></label>
+  </div>
+  <div class="row">
+    <span class="label"><b>Appear as</b><span>Operating system reported to websites</span></span>
+    <select id="profile">
+      <option value="windows">Windows 10/11 x64</option>
+      <option value="linux">Linux x86_64</option>
+      <option value="macos">macOS</option>
+      <option value="native">Real platform</option>
+    </select>
+  </div>
+  <div class="row">
+    <span class="label"><b>Rewrite request headers</b><span>User-Agent and client hints, at the network layer</span></span>
+    <label class="switch"><input type="checkbox" id="spoofHeaders"><i></i></label>
+  </div>
+
+  <div class="note">
+    <b>On blending in.</b> The largest crowd on the web is Chrome on Windows x64, which is why
+    that is the default. Picking a rarer combination makes you more distinctive, not less.
+    Changes apply to pages loaded after they are saved.
+  </div>
+
+  <h2>Surfaces</h2>
+  <div class="list" id="features"></div>
+
+  <h2>Exceptions</h2>
+  <div class="row">
+    <span class="label"><b>Disable on these sites</b><span>One hostname per entry, subdomains included</span></span>
+  </div>
+  <div class="row">
+    <input type="text" id="exceptionInput" placeholder="example.com" style="flex:1">
+    <button class="btn" id="addException">Add</button>
+  </div>
+  <div class="list" id="exceptions"></div>
+
+  <div class="foot">
+    <button class="btn" id="reset">Reset to defaults</button>
+    <span class="spacer"></span>
+    <a href="https://evil.st/docs#fingerprint" target="_blank" rel="noopener">Documentation</a>
+  </div>
+</div>
+<script src="options.js"></script>
+</body>
+</html>

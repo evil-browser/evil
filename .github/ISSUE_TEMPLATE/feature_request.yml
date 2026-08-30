@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest something evil should do
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that the browser makes hard?
+    validations: { required: true }
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you'd like instead
+    validations: { required: true }
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Can an extension, a flag or a setting already do this?
+      description: |
+        Every feature is a patch, and every patch has to be rebased onto a new
+        Chromium every two weeks. Things that can live outside the patch set
+        should.
+    validations: { required: true }

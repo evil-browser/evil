@@ -1,0 +1,37 @@
+name: Site breakage
+description: A website misbehaves in evil but works elsewhere
+labels: [breakage, triage]
+body:
+  - type: input
+    id: url
+    attributes:
+      label: URL
+      description: The exact page. Without it, this cannot be fixed.
+    validations: { required: true }
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What breaks
+      placeholder: "The video player shows a black frame and never starts."
+    validations: { required: true }
+
+  - type: dropdown
+    id: shields
+    attributes:
+      label: Does it work with shields off?
+      options: ["Yes — works with shields off", "No — still broken", "Not tested"]
+    validations: { required: true }
+
+  - type: dropdown
+    id: noise
+    attributes:
+      label: Does it work with --no-fingerprint-noise?
+      options: ["Yes — works without noise", "No — still broken", "Not tested"]
+    validations: { required: true }
+
+  - type: input
+    id: version
+    attributes:
+      label: Version and OS
+    validations: { required: true }

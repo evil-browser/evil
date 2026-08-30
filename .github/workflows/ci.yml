@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  repo:
+    name: Repository checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shell scripts are valid
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y shellcheck
+          for f in scripts/*.sh tools/*.sh; do bash -n "$f"; done
+          shellcheck -x -S warning scripts/*.sh tools/*.sh
+
+      - name: Patch series is consistent
+        run: |
+          fail=0
+          while read -r p; do
+            [ -z "$p" ] && continue
+            case "$p" in \#*) continue ;; esac
+            if [ ! -f "patches/$p" ]; then echo "::error::series lists missing patch: $p"; fail=1; fi
+          done < patches/series
+          while IFS= read -r f; do
+            rel="${f#patches/}"
+            if ! grep -qxF "$rel" patches/series; then
+              echo "::error::patch not listed in series: $rel"; fail=1
+            fi
+          done < <(find patches -name '*.patch' | sort)
+          exit $fail
+
+      - name: Chromium version is a plausible tag
+        run: grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$' CHROMIUM_VERSION
+
+      - name: GN argument files parse
+        run: |
+          for f in build/args/*.gni; do
+            grep -vE '^\s*(#|$)' "$f" | grep -vqE '^[a-z_]+ = ' && {
+              echo "::error::$f has a line that is not 'name = value'"; exit 1; }
+          done
+          echo "ok"
+
+      - name: Docs links resolve
+        run: |
+          python3 - <<'EOF'
+          import pathlib, re, sys
+          bad = []
+          for md in pathlib.Path('.').rglob('*.md'):
+              for link in re.findall(r'\]\(([^)]+)\)', md.read_text()):
+                  if link.startswith(('http', 'mailto:', '#')):
+                      continue
+                  if not (md.parent / link.split('#')[0]).exists():
+                      bad.append(f'{md}: {link}')
+          for b in bad:
+              print(f'::error::broken link {b}')
+          sys.exit(1 if bad else 0)
+          EOF
+
+  build:
+    name: Build ${{ matrix.os }}
+    if: github.repository == 'evil-browser/evil'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [linux, macos, windows]
+    runs-on: [self-hosted, "${{ matrix.os }}", chromium-checkout]
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync to pinned Chromium
+        run: EVIL_ASSUME_YES=1 make sync
+
+      - name: Apply patches
+        run: make patch
+
+      - name: Build
+        run: make build JOBS=${{ vars.BUILD_JOBS || 16 }}
+
+      - name: Test
+        run: make test
+
+      - name: Package
+        run: make package && make checksums
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: evil-${{ matrix.os }}
+          path: dist/
+          retention-days: 14

@@ -1,0 +1,93 @@
+{
+  "homepage": "https://duckduckgo.com/",
+  "homepage_is_newtabpage": false,
+  "session": { "restore_on_startup": 5 },
+  "browser": {
+    "show_home_button": true,
+    "check_default_browser": false,
+    "has_seen_welcome_page": true,
+    "enable_spellchecking": true
+  },
+  "bookmark_bar": { "show_on_all_tabs": false },
+  "distribution": {
+    "import_bookmarks": false,
+    "import_history": false,
+    "import_home_page": false,
+    "import_search_engine": false,
+    "make_chrome_default": false,
+    "make_chrome_default_for_user": false,
+    "suppress_first_run_bubble": true,
+    "do_not_create_quick_launch_shortcut": true,
+    "do_not_create_taskbar_shortcut": true,
+    "do_not_launch_chrome": true,
+    "do_not_register_for_update_launch": true,
+    "skip_first_run_ui": true,
+    "verbose_logging": false
+  },
+  "default_search_provider": {
+    "enabled": true,
+    "name": "DuckDuckGo",
+    "keyword": "duck.com",
+    "search_url": "https://duckduckgo.com/?q={searchTerms}&t=evil",
+    "suggest_url": "",
+    "icon_url": "https://duckduckgo.com/favicon.ico",
+    "encodings": "UTF-8"
+  },
+  "search": { "suggest_enabled": false },
+  "alternate_error_pages": { "enabled": false },
+  "safebrowsing": {
+    "enabled": false,
+    "enhanced": false,
+    "scout_reporting_enabled": false,
+    "extended_reporting_opt_in_allowed": false
+  },
+  "spellcheck": { "use_spelling_service": false },
+  "translate": { "enabled": false },
+  "net": { "network_prediction_options": 2 },
+  "dns_prefetching": { "enabled": false },
+  "signin": { "allowed": false, "allowed_on_next_startup": false },
+  "sync": { "suppress_start": true, "requested": false },
+  "sync_promo": { "show_on_first_run_allowed": false, "user_skipped": true },
+  "metrics": { "reporting_enabled": false },
+  "user_experience_metrics": { "reporting_enabled": false, "personalization_data_consent_enabled": false },
+  "feedback_allowed": false,
+  "background_mode": { "enabled": false },
+  "hardware_acceleration_mode": { "enabled": true },
+  "media_router": { "enable_media_router": false },
+  "payments": { "can_make_payment_enabled": false },
+  "autofill": { "credit_card_enabled": false, "profile_enabled": true },
+  "credentials_enable_service": true,
+  "credentials_enable_autosignin": false,
+  "profile": {
+    "password_manager_leak_detection": false,
+    "default_content_setting_values": {
+      "geolocation": 2,
+      "notifications": 2,
+      "midi_sysex": 2,
+      "usb_chooser_data": 2,
+      "serial_chooser_data": 2,
+      "hid_chooser_data": 2,
+      "bluetooth_chooser_data": 2,
+      "idle_detection": 2,
+      "payment_handler": 2,
+      "sensors": 2
+    },
+    "cookie_controls_mode": 1
+  },
+  "privacy_sandbox": {
+    "m1": {
+      "ad_measurement_enabled": false,
+      "consent_decision_made": true,
+      "fledge_enabled": false,
+      "restricted_notice_shown_to_guardian": true,
+      "row_notice_acknowledged": true,
+      "topics_enabled": false
+    },
+    "apis_enabled_v2": false,
+    "first_party_sets_data_access_allowed_initialized": true
+  },
+  "domain_reliability": { "allowed_by_policy": false },
+  "optimization_guide": { "fetching_enabled": false },
+  "ntp": { "num_personal_suggestions": 0 },
+  "first_run_tabs": ["https://evil.st/docs"]
+}

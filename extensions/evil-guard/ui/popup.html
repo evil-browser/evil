@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="ui.css">
+<style>
+body { width: 340px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 4px; }
+.stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; }
+.stat b { display: block; font-size: 20px; font-weight: 700; }
+.stat span { font-size: 9.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dimmer); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <svg viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke-linecap="butt" stroke-linejoin="miter"><path d="M451.63 214.42A200 200 0 1 1 317.80 65.79" stroke="#fff" stroke-width="44"/><path d="M330.92 70.56A200 200 0 0 1 448.25 200.87" stroke="#b3b3b3" stroke-width="44"/><path d="M216 182L296 256L216 330" stroke="#fff" stroke-width="44"/></g></svg>
+    <h1>Guard</h1>
+    <span class="sub" id="scanned">—</span>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="high">0</b><span>High</span></div>
+    <div class="stat"><b id="review">0</b><span>Review</span></div>
+    <div class="stat"><b id="low">0</b><span>Low</span></div>
+  </div>
+  <div class="list" id="top"></div>
+  <div class="foot">
+    <button class="btn" id="rescan">Rescan</button>
+    <span class="spacer"></span>
+    <button class="btn btn--primary" id="options">Full report</button>
+  </div>
+</div>
+<script src="popup.js"></script>
+</body>
+</html>

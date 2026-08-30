@@ -1,0 +1,22 @@
+[Desktop Entry]
+Version=1.0
+Name=evil
+GenericName=Web Browser
+Comment=Fast, private, feather-light browser
+Exec=/opt/evil/evil %U
+Icon=evil
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true
+StartupWMClass=evil
+Actions=NewWindow;NewPrivateWindow;
+
+[Desktop Action NewWindow]
+Name=New Window
+Exec=/opt/evil/evil
+
+[Desktop Action NewPrivateWindow]
+Name=New Private Window
+Exec=/opt/evil/evil --incognito
