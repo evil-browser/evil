@@ -19,20 +19,12 @@ if [[ ! -d "$SRC_DIR" ]]; then
   log "First checkout — this downloads tens of gigabytes and can take hours"
   confirm "Continue?" || exit 1
   cd "$REPO_ROOT" || die "cannot enter $REPO_ROOT"
-  cat > .gclient <<GCLIENT
-solutions = [
-  {
-    "name": "src",
-    "url": "https://chromium.googlesource.com/chromium/src.git",
-    "managed": False,
-    "custom_deps": {},
-    "custom_vars": {
-      "checkout_pgo_profiles": True,
-    },
-  },
-]
-GCLIENT
-  fetch --nohooks --no-history chromium
+  if [[ -f "$REPO_ROOT/.gclient" ]]; then
+    info "reusing existing .gclient"
+    gclient sync --nohooks --no-history --shallow
+  else
+    fetch --nohooks --no-history chromium
+  fi
 else
   log "Updating existing checkout"
 fi

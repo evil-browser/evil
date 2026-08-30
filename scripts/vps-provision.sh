@@ -32,17 +32,35 @@ if [[ "$PKG" == "apt" ]]; then
 else
   dnf install -y -q epel-release || true
   dnf install -y -q \
-    git curl ca-certificates python3 python3-pip \
+    git curl ca-certificates \
     gcc gcc-c++ make pkgconf-pkg-config xz zip unzip \
     tmux rsync file sudo gnupg2 patch libatomic perl
   dnf install -y -q ccache || echo "    ccache unavailable, continuing without it"
+  for candidate in python3.13 python3.12 python3.11 python3.10 python3.9; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      NEWEST_PY="$candidate"
+      break
+    fi
+  done
+  if [[ -z "${NEWEST_PY:-}" ]]; then
+    dnf install -y -q python3.12 python3.12-pip
+    NEWEST_PY=python3.12
+  fi
+  PY_VER="$("$NEWEST_PY" -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
+  CUR_VER="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || echo 0.0)"
+  if [[ "$(printf '%s\n3.9\n' "$CUR_VER" | sort -V | head -1)" != "3.9" ]]; then
+    echo "    python3 points at $CUR_VER, repointing at $PY_VER"
+    alternatives --install /usr/bin/python3 python3 "$(command -v "$NEWEST_PY")" 50 >/dev/null 2>&1 || true
+    alternatives --set python3 "$(command -v "$NEWEST_PY")"
+  fi
   PY_VER="$(python3 -c 'import sys; print("%d.%d" % sys.version_info[:2])')"
   if [[ "$(printf '%s\n3.9\n' "$PY_VER" | sort -V | head -1)" != "3.9" ]]; then
-    echo "error: Chromium needs Python 3.9 or newer, found $PY_VER" >&2
-    echo "       dnf install python3.12 && alternatives --set python3 /usr/bin/python3.12" >&2
+    echo "error: Chromium needs Python 3.9 or newer, python3 is $PY_VER" >&2
     exit 1
   fi
   echo "    python3 $PY_VER"
+  echo "    note: installing python3-pip on el8 drags in python36 and hijacks"
+  echo "          the python3 alternative, so it is deliberately not installed"
   echo "    ninja comes from depot_tools, not the distribution"
 fi
 
@@ -63,9 +81,11 @@ echo "==> Memory: ${TOTAL_RAM_GB} GB"
 if [[ "$TOTAL_RAM_GB" -lt 32 ]]; then
   if ! swapon --show | grep -q '/swapfile'; then
     echo "    adding ${SWAP_GB} GB swap (linking Chromium needs it below 32 GB)"
-    fallocate -l "${SWAP_GB}G" /swapfile
+    if [[ ! -f /swapfile ]]; then
+      fallocate -l "${SWAP_GB}G" /swapfile || dd if=/dev/zero of=/swapfile bs=1M count=$((SWAP_GB * 1024)) status=none
+    fi
     chmod 600 /swapfile
-    mkswap -q /swapfile
+    mkswap /swapfile >/dev/null
     swapon /swapfile
     grep -q '^/swapfile' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
   else
