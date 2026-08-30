@@ -18,10 +18,17 @@ actually want built in, and nothing you have to take on trust.
 ## What this is
 
 A Chromium fork maintained as a **patch set plus a configuration payload**, not a
-copy of the tree. This repository holds patches, build configuration, the
-bundled extensions, the theme and the packaging scripts — a few megabytes.
-Chromium itself is fetched at build time and pinned in
+copy of the tree. This repository holds build configuration, the bundled
+extensions, the theme, the packaging scripts and evil's own patches — a few
+megabytes. Chromium itself is fetched at build time and pinned in
 [`CHROMIUM_VERSION`](CHROMIUM_VERSION).
+
+The de-Googling layer is [ungoogled-chromium](https://github.com/ungoogled-software/ungoogled-chromium)'s
+patch set, pinned in [`UNGOOGLED_VERSION`](UNGOOGLED_VERSION) and fetched at
+build time. They have maintained that work across upstream releases for years;
+reimplementing it would take months and be worse. evil adds branding, the
+extension suite, the configuration payload, the performance profile and its own
+patches on top. See [docs/UPSTREAM.md](docs/UPSTREAM.md).
 
 That structure is deliberate. It keeps the diff against upstream small enough
 for a person to read, and it means a Chromium security fix is a version bump and
@@ -67,7 +74,8 @@ On a machine with 16 GB of RAM and 100 GB of free disk:
 ```sh
 make bootstrap   # depot_tools and prerequisite checks
 make sync        # fetch Chromium at the pinned tag (slow, 40+ GB)
-make patch       # apply patches/series
+make upstream    # fetch the pinned ungoogled-chromium patch set
+make patch       # prune, apply upstream patches, then evil's
 make build       # gn gen + autoninja
 make pack        # pack the bundled extensions into CRXs
 make package     # installers into dist/
@@ -89,7 +97,8 @@ browser/
 ├── config/                initial preferences, enterprise policy, Web Store hooks
 ├── extensions/            evil Shield, evil Clean, evil Guard
 ├── theme/evil-dark/       The monochrome theme
-├── patches/               The patch set, ordered by patches/series
+├── UNGOOGLED_VERSION      Pinned ungoogled-chromium release, must match the above
+├── patches/               evil's own patches, plus the upstream exclusion list
 ├── resources/branding/    Icons and product strings
 ├── scripts/               The build pipeline and the dev runner
 ├── tools/                 Packaging helpers
@@ -101,6 +110,9 @@ browser/
 | Document | Covers |
 | --- | --- |
 | [BUILDING.md](docs/BUILDING.md) | Full build, per platform, and what to do when it breaks |
+| [UPSTREAM.md](docs/UPSTREAM.md) | The ungoogled-chromium base, exclusions, version pinning |
+| [VPS.md](docs/VPS.md) | Building on a rented machine, and registering it as a runner |
+| [PERFORMANCE.md](docs/PERFORMANCE.md) | Build profiles, instruction sets, how to measure |
 | [HARDENING.md](docs/HARDENING.md) | Every Google connection removed, by layer, and how to verify |
 | [EXTENSIONS.md](docs/EXTENSIONS.md) | What ships, Shield's design, Guard's risk model |
 | [THEME.md](docs/THEME.md) | Palette and how to change it |
@@ -116,9 +128,13 @@ v1.0.0 has not shipped. Concretely:
 
 - **Working today:** the extension suite, the theme, the configuration payload,
   the build and packaging pipeline. `make dev` runs all of it.
-- **Not written yet:** the C++ patch set. `patches/series` is empty, so
-  `make build` currently produces a Chromium hardened by GN arguments alone.
-  What needs patching, and where each item lands upstream, is enumerated in
+- **Working, unbuilt:** the de-Googling layer. 108 upstream patches and 13,848
+  pruned binaries are wired into `make patch` and pinned to Chromium 152, but no
+  full build has been run yet — the first one is what turns this from a
+  configuration into a browser.
+- **Not written yet:** evil's own C++ patches. `patches/series` is empty. The
+  renderer-level fingerprint defences, the in-network-service content blocker
+  and cross-profile burning all live in
   [patches/PLANNED.md](patches/PLANNED.md).
 
 The renderer-level fingerprint defences, the in-network-service content blocker

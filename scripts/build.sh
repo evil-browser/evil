@@ -30,11 +30,15 @@ OS="$(host_os)"
 CPU="${TARGET_CPU:-$(host_cpu)}"
 OUT_DIR="$OUT_ROOT/$CONFIG"
 
-args_files=(
+UNGOOGLED_FLAGS="$REPO_ROOT/third_party/ungoogled-chromium/flags.gn"
+args_files=()
+[[ -f "$UNGOOGLED_FLAGS" ]] && args_files+=("$UNGOOGLED_FLAGS")
+args_files+=(
   "$REPO_ROOT/build/args/common.gni"
   "$REPO_ROOT/build/args/$OS.gni"
   "$REPO_ROOT/build/args/$CONFIG.gni"
 )
+[[ "$CONFIG" == "release" ]] && args_files+=("$REPO_ROOT/build/args/performance.gni")
 [[ -f "$REPO_ROOT/build/args/local.gni" ]] && args_files+=("$REPO_ROOT/build/args/local.gni")
 
 mkdir -p "$OUT_DIR"

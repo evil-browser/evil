@@ -3,7 +3,7 @@ Version=1.0
 Name=evil
 GenericName=Web Browser
 Comment=Fast, private, feather-light browser
-Exec=/opt/evil/evil %U
+Exec=/opt/evil/evil --fingerprinting-canvas-image-data-noise --fingerprinting-canvas-measuretext-noise --fingerprinting-client-rects-noise --webgl-renderer-info-spoof %U
 Icon=evil
 Terminal=false
 Type=Application
@@ -15,8 +15,8 @@ Actions=NewWindow;NewPrivateWindow;
 
 [Desktop Action NewWindow]
 Name=New Window
-Exec=/opt/evil/evil
+Exec=/opt/evil/evil --fingerprinting-canvas-image-data-noise --fingerprinting-canvas-measuretext-noise --fingerprinting-client-rects-noise --webgl-renderer-info-spoof
 
 [Desktop Action NewPrivateWindow]
 Name=New Private Window
-Exec=/opt/evil/evil --incognito
+Exec=/opt/evil/evil --fingerprinting-canvas-image-data-noise --fingerprinting-canvas-measuretext-noise --fingerprinting-client-rects-noise --webgl-renderer-info-spoof --incognito

@@ -1,0 +1,2 @@
+extra_cflags = [ "-march=x86-64-v3", "-mtune=generic", "-maes" ]
+extra_cxxflags = [ "-march=x86-64-v3", "-mtune=generic", "-maes" ]

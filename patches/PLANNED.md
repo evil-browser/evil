@@ -1,55 +1,98 @@
-# What still needs a patch
+# evil's own patches
 
-Everything the extension and configuration layers can do, they already do — see
-[../docs/HARDENING.md](../docs/HARDENING.md) and
-[../docs/EXTENSIONS.md](../docs/EXTENSIONS.md). This file lists what they
-*cannot* do, with the upstream file each item lands in. These are the patches
-`patches/series` will grow, in roughly this order.
+The de-Googling layer is [ungoogled-chromium](../docs/UPSTREAM.md)'s and is
+already wired in. This file is what remains for evil specifically, in the order
+it should be written.
 
-## build
+Reading their patch set changed this list considerably: several things that
+would have been months of Blink work already exist upstream as flags. Our job
+for those is to turn them on, not to build them.
 
-**Toolchain and packaging only.** Most of what would go here is already a GN
-argument in `build/args/`. Add a patch only when upstream offers no flag.
+## 1. Defaults for the fingerprinting switches
 
-## branding
+**Status: the highest-value patch in the project, and a small one.**
 
-| Item | Upstream location |
+Upstream adds renderer-level fingerprint noise, but ships it off:
+
+| Switch | Adds |
 | --- | --- |
-| Product name, bundle id, copyright strings | `chrome/app/theme/chromium/BRANDING` → point at `resources/branding/BRANDING` |
-| Application icons | `chrome/app/theme/chromium/` |
-| `chrome://` → `evil://` scheme | `chrome/common/webui_url_constants.cc`, `content/public/common/url_constants.cc` |
-| Tab shape, corner radius, toolbar density | `chrome/browser/ui/views/tabs/`, `chrome/browser/ui/layout_constants.cc` |
-| New tab page without Google assets | `chrome/browser/new_tab_page/` |
-| Remove the Chrome Web Store hint from the extensions page | `chrome/browser/resources/extensions/` |
+| `--fingerprinting-canvas-image-data-noise` | Per-session noise on canvas image data |
+| `--fingerprinting-canvas-measuretext-noise` | Noise on text measurement |
+| `--fingerprinting-client-rects-noise` | Noise on element geometry |
+| `--webgl-renderer-info-spoof` | Generic WebGL vendor and renderer strings |
+| `--reduce-system-info` | Trims exposed hardware detail |
+| `--remove-client-hints` | Drops the `Sec-CH-UA-*` family |
 
-The theme extension already carries the palette. These patches are about
-geometry and strings, not colour.
+evil promises "scrambled by default from the very first launch", so these have
+to be on without the user finding a flags page. Append them to the command line
+in the browser process at startup, and let an explicit `--no-fingerprint-noise`
+turn them off again.
 
-## privacy
+Land in: `chrome/app/chrome_main_delegate.cc`, in the `PreSandboxStartup` path
+where the command line is already being modified.
 
-| Item | Why an extension cannot do it | Upstream location |
-| --- | --- | --- |
-| Canvas, WebGL and audio noise in the renderer | An extension patches JavaScript objects; a page can compare against a fresh iframe's prototypes to detect it. Doing it in Blink is invisible and cannot be raced at `document_start`. | `third_party/blink/renderer/core/html/canvas/`, `platform/graphics/`, `modules/webaudio/` |
-| Font enumeration limits | Fonts are measured through layout, not an API a content script can intercept. | `third_party/blink/renderer/platform/fonts/` |
-| DNS cache, socket pool and HSTS clearing on burn | `chrome.browsingData` does not expose them. | `chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.cc` |
-| Cross-profile burn | An extension only sees its own profile. | `chrome/browser/browsing_data/` |
-| Update client replacement | Not reachable from an extension at all. | `chrome/browser/component_updater/`, `components/update_client/` |
-| DuckDuckGo as the built-in default engine | Policy sets it, but the prepopulated list still ships Google first. | `components/search_engines/prepopulated_engines.json`, `template_url_prepopulate_data.cc` |
-| Remove the remaining startup connections | Some survive both GN and policy. | `chrome/browser/browser_process_impl.cc`, `components/variations/service/` |
+These are renderer-level, unlike evil Shield's JavaScript overrides, so they
+cannot be detected by comparing against a fresh iframe's prototypes. Once this
+lands, Shield's canvas and WebGL layers become redundant and should be turned
+off by default to avoid double-noising.
 
-## features
+## 2. DuckDuckGo as the built-in default engine
 
-| Item | Upstream location |
+Policy and preferences already pin it, but the prepopulated list still ships
+Google first, so a profile reset or a policy failure falls back to Google.
+
+Upstream's `extra/ungoogled-chromium/prepopulated-search-engines.patch` already
+edits this list — our patch should stack on it rather than fight it.
+
+Land in: `components/search_engines/prepopulated_engines.json`,
+`template_url_prepopulate_data.cc`.
+
+## 3. Burn-all as a first-class command
+
+evil Clean covers most of it from an extension, but three things are out of
+reach of `chrome.browsingData`:
+
+- the DNS cache and the socket pool
+- HSTS state
+- other profiles
+
+Upstream's `add-flag-to-clear-data-on-exit.patch` adds a `ClearDataOnExit`
+feature, disabled by default — worth enabling as part of this.
+
+Land in: `chrome/browser/browsing_data/chrome_browsing_data_remover_delegate.cc`,
+`chrome/browser/ui/browser_commands.cc`, `chrome/app/chrome_command_ids.h`.
+
+## 4. Branding
+
+| Item | Location |
 | --- | --- |
-| uBlock Origin's engine in the network service | `services/network/`, `components/subresource_filter/` |
-| Containers: a `StoragePartition` per tab group | `content/browser/storage_partition_impl.cc`, `chrome/browser/ui/tabs/` |
-| Burn-all as a first-class UI surface and shortcut | `chrome/browser/ui/browser_commands.cc`, `chrome/app/chrome_command_ids.h` |
-| Tab freezing and discarding policy | `chrome/browser/performance_manager/` |
-| Shield level as a browser setting rather than an extension option | `chrome/browser/ui/webui/settings/` |
-| Low-memory mode | `chrome/browser/performance_manager/`, `content/browser/renderer_host/render_process_host_impl.cc` |
+| Product strings, bundle id | `chrome/app/theme/chromium/BRANDING` → `resources/branding/BRANDING` |
+| Icons | `chrome/app/theme/chromium/` |
+| `chrome://` → `evil://` | `chrome/common/webui_url_constants.cc`, `content/public/common/url_constants.cc` |
+| Tab geometry, toolbar density | `chrome/browser/ui/views/tabs/`, `chrome/browser/ui/layout_constants.cc` |
+
+The theme extension already carries the palette; this is strings and geometry.
+
+## 5. Content blocking in the network service
+
+Move uBlock Origin's engine below the extension system so Manifest V3 policy can
+never restrict it. The largest item on this list by a wide margin, and the
+extension works today, so it is last.
+
+Land in: `services/network/`, `components/subresource_filter/`.
+
+## 6. Tab lifecycle and low-memory mode
+
+Tighten upstream's freezing and discarding policy; keep title, favicon and
+scroll offset on discard; lower the renderer process cap under 4 GB of RAM.
+
+Land in: `chrome/browser/performance_manager/`,
+`content/browser/renderer_host/render_process_host_impl.cc`.
 
 ## The rule that governs this list
 
-Every item here costs a rebase every two weeks, forever. Before adding one, be
-sure it cannot be a GN argument, a policy key, a preference, or an extension.
-Half of what forks patch is a flag they did not find.
+Every patch here is rebased onto a new Chromium every two weeks, forever. Before
+adding one, check it is not already a GN argument, a policy key, a preference,
+an upstream flag, or something an extension can do. Reading
+`third_party/ungoogled-chromium/patches/series` first has already saved this
+project months.

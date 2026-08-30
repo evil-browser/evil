@@ -4,7 +4,7 @@ SHELL := /bin/bash
 CONFIG ?= release
 JOBS   ?=
 
-.PHONY: help dev pack bootstrap sync patch unpatch status build build-debug package checksums test clean distclean version
+.PHONY: help dev pack upstream bootstrap sync patch unpatch status build build-debug package checksums test clean distclean version
 
 help: ## Show this help
 	@echo "evil — make targets"
@@ -22,6 +22,9 @@ pack: ## Pack the bundled extensions and theme into CRXs
 
 bootstrap: ## Fetch depot_tools and check prerequisites
 	@scripts/bootstrap.sh
+
+upstream: ## Fetch the pinned ungoogled-chromium patch set
+	@scripts/upstream.sh fetch
 
 sync: ## Fetch/update the Chromium tree at the pinned version
 	@scripts/sync.sh
@@ -51,11 +54,12 @@ test: ## Run the evil-specific test targets
 	@scripts/build.sh --config $(CONFIG) --target evil_unittests
 	@out/$(CONFIG)/evil_unittests
 
-version: ## Print the pinned Chromium version
-	@cat CHROMIUM_VERSION
+version: ## Print the pinned versions
+	@echo "chromium:  $$(cat CHROMIUM_VERSION)"
+	@echo "ungoogled: $$(cat UNGOOGLED_VERSION)"
 
 clean: ## Remove build output, keep the checkout
 	rm -rf out dist
 
 distclean: clean ## Also remove the Chromium checkout (40+ GB)
-	rm -rf src .gclient .gclient_entries .gclient_previous_sync_commits
+	rm -rf src .gclient .gclient_entries .gclient_previous_sync_commits third_party/ungoogled-chromium

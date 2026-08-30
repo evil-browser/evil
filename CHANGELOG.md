@@ -8,10 +8,10 @@ Versions are evil's own; the Chromium base is noted per release.
 
 ## [Unreleased]
 
-Working toward 1.0.0: crash-rate targets on all three platforms, and an import
+Base: ungoogled-chromium 152.0.7977.64-1. Working toward 1.0.0: crash-rate targets on all three platforms, and an import
 path that stops surprising people.
 
-## [0.9.4] — 2026-08-21 — Chromium 141.0.7390
+## [0.9.4] — 2026-08-21 — Chromium 152.0.7977
 
 ### Added
 - Container assignment rules: map a domain to a container once, and every
@@ -29,9 +29,9 @@ path that stops surprising people.
   deferred past first paint.
 
 ### Security
-- Merged Chromium 141.0.7390 security fixes.
+- Merged Chromium 152.0.7977 security fixes.
 
-## [0.9.3] — 2026-08-04 — Chromium 141.0.7339
+## [0.9.3] — 2026-08-04 — Chromium 151.0.7922
 
 ### Added
 - Fingerprint noise seeds derived per session *and* per eTLD+1.
@@ -44,7 +44,7 @@ path that stops surprising people.
 - Screen-metric bucketing no longer breaks fullscreen video on ultrawide
   displays.
 
-## [0.9.2] — 2026-07-17 — Chromium 140.0.7291
+## [0.9.2] — 2026-07-17 — Chromium 150.0.7871
 
 ### Added
 - Burn clears every profile at once, including service workers and their
@@ -58,7 +58,7 @@ path that stops surprising people.
 ### Changed
 - Burning a large profile: ~9 s → under 1 s.
 
-## [0.9.1] — 2026-06-30 — Chromium 140.0.7259
+## [0.9.1] — 2026-06-30 — Chromium 150.0.7871
 
 ### Added
 - Discarded tabs keep title, favicon and scroll position; they reload on focus.
@@ -68,7 +68,7 @@ path that stops surprising people.
 ### Fixed
 - Pinned tabs and tabs holding a live WebSocket are exempt from discarding.
 
-## [0.9.0] — 2026-06-09 — Chromium 140.0.7212
+## [0.9.0] — 2026-06-09 — Chromium 149.0.7794
 
 First build with the full feature set enabled.
 
@@ -81,7 +81,7 @@ First build with the full feature set enabled.
 ### Removed
 - Google Safe Browsing; badware and phishing lists moved into the local blocker.
 
-## [0.8.0] — 2026-03-28 — Chromium 138.0.7024
+## [0.8.0] — 2026-03-28 — Chromium 147.0.7583
 
 Groundwork: Google update service, field trials, crash upload and first-run
 pings removed; LTO/PGO build; own update mechanism; profile and container

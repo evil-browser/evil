@@ -1,19 +1,7 @@
 is_chrome_branded = false
 chrome_pgo_phase = 2
 
-google_api_key = ""
-google_default_client_id = ""
-google_default_client_secret = ""
-use_official_google_api_keys = false
-
-safe_browsing_mode = 0                   # no Safe Browsing lookups at all
-enable_reporting = false                 # no Reporting API upload
-enable_remoting = false                  # no Chrome Remote Desktop host
-enable_mdns = false
-enable_service_discovery = false
-enable_hangout_services_extension = false
 enable_nacl = false
-disable_fieldtrial_testing_config = true # no field trials
 
 proprietary_codecs = true
 ffmpeg_branding = "Chrome"
