@@ -20,6 +20,29 @@ $StatusFile = Join-Path $Root "build-status.txt"
 $ChromiumVersion = (Get-Content (Join-Path $Root "CHROMIUM_VERSION")).Trim()
 $UngoogledVersion = (Get-Content (Join-Path $Root "UNGOOGLED_VERSION")).Trim()
 
+function Resolve-Tooling {
+    $machine = [Environment]::GetEnvironmentVariable("Path", "Machine")
+    $user = [Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = ($machine, $user, $env:Path | Where-Object { $_ }) -join ';'
+
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        foreach ($c in @("$env:ProgramFiles\Git\cmd", "${env:ProgramFiles(x86)}\Git\cmd", "$env:LOCALAPPDATA\Programs\Git\cmd")) {
+            if (Test-Path (Join-Path $c "git.exe")) { $env:Path = "$c;$env:Path"; break }
+        }
+    }
+    if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
+        $py = Get-ChildItem "$env:ProgramFiles\Python3*", "$env:LOCALAPPDATA\Programs\Python\Python3*" -Directory -ErrorAction SilentlyContinue |
+              Sort-Object Name -Descending | Select-Object -First 1
+        if ($py) { $env:Path = "$($py.FullName);$($py.FullName)\Scripts;$env:Path" }
+    }
+
+    foreach ($tool in @('git', 'python')) {
+        if (-not (Get-Command $tool -ErrorAction SilentlyContinue)) {
+            throw "$tool not found on PATH and not in the usual install locations"
+        }
+    }
+}
+
 function Write-Step($m) { $t = Get-Date -Format "HH:mm:ss"; Write-Host "[$t] ==> $m" -ForegroundColor White }
 function Write-Info($m) { Write-Host "         $m" -ForegroundColor DarkGray }
 function Set-Status($m) { "$(Get-Date -Format o) $m" | Add-Content -Path $StatusFile }
@@ -212,9 +235,13 @@ function Stage-Package {
     Set-Status "package ok"
 }
 
+Resolve-Tooling
+
 Write-Host ""
 Write-Step "evil windows build, stage: $Stage"
 Write-Info "root:      $Root"
+Write-Info "git:       $((git --version) -replace 'git version ','')"
+Write-Info "python:    $((python --version) -replace 'Python ','')"
 Write-Info "chromium:  $ChromiumVersion"
 Write-Info "ungoogled: $UngoogledVersion"
 Write-Host ""
