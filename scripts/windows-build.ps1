@@ -7,7 +7,7 @@ param(
     [int]$Jobs = 0
 )
 
-$ErrorActionPreference = "Stop"
+$ErrorActionPreference = "Continue"
 $ProgressPreference = "SilentlyContinue"
 
 $Root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
@@ -56,6 +56,19 @@ function Use-DepotTools {
     $env:DEPOT_TOOLS_UPDATE = "1"
 }
 
+function Invoke-Git($arguments, $label, [switch]$Tolerate) {
+    $out = & git @arguments 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        if ($Tolerate) {
+            Write-Info "$label returned $LASTEXITCODE, continuing"
+            return $false
+        }
+        $out | Select-Object -Last 5 | ForEach-Object { Write-Info $_ }
+        Fail "$label failed with $LASTEXITCODE"
+    }
+    return $true
+}
+
 function Invoke-Native($file, $arguments, $workdir, $label) {
     Write-Info "$file $arguments"
     $p = Start-Process -FilePath $file -ArgumentList $arguments -WorkingDirectory $workdir `
@@ -66,11 +79,10 @@ function Invoke-Native($file, $arguments, $workdir, $label) {
 function Stage-Bootstrap {
     Write-Step "depot_tools"
     if (Test-Path (Join-Path $DepotTools ".git")) {
-        Write-Info "already present, updating"
-        git -C $DepotTools pull --ff-only --quiet
+        Write-Info "already present, it self-updates on each gclient invocation"
     } else {
         New-Item -ItemType Directory -Force -Path (Split-Path $DepotTools) | Out-Null
-        git clone --quiet https://chromium.googlesource.com/chromium/tools/depot_tools.git $DepotTools
+        Invoke-Git @('clone', '--quiet', 'https://chromium.googlesource.com/chromium/tools/depot_tools.git', $DepotTools) "depot_tools clone" | Out-Null
     }
     [Environment]::SetEnvironmentVariable("DEPOT_TOOLS_WIN_TOOLCHAIN", "0", "Machine")
     Use-DepotTools
@@ -92,12 +104,12 @@ function Stage-Sync {
     }
     if (-not (Test-Path $Src)) { Fail "fetch produced no src directory" }
 
-    $dirty = git -C $Src status --porcelain
+    $dirty = & git -C $Src status --porcelain 2>$null
     if ($dirty) { Fail "src has local modifications, run -Stage patch after a revert" }
 
     Write-Info "checking out tag $ChromiumVersion"
-    git -C $Src fetch --tags --depth 1 origin "refs/tags/$ChromiumVersion"
-    git -C $Src checkout --detach $ChromiumVersion
+    Invoke-Git @('-C', $Src, 'fetch', '--tags', '--depth', '1', 'origin', "refs/tags/$ChromiumVersion") "tag fetch" | Out-Null
+    Invoke-Git @('-C', $Src, 'checkout', '--detach', $ChromiumVersion) "tag checkout" | Out-Null
     Invoke-Native "cmd.exe" "/c gclient sync --with_branch_heads --with_tags --delete_unversioned_trees --reset" $Root "gclient sync"
     Set-Status "sync ok $ChromiumVersion"
 }
@@ -105,12 +117,12 @@ function Stage-Sync {
 function Stage-Upstream {
     Write-Step "ungoogled-chromium $UngoogledVersion"
     if (Test-Path (Join-Path $Ungoogled ".git")) {
-        git -C $Ungoogled fetch --tags --quiet origin
+        Invoke-Git @('-C', $Ungoogled, 'fetch', '--tags', '--quiet', 'origin') "ungoogled fetch" -Tolerate | Out-Null
     } else {
         New-Item -ItemType Directory -Force -Path (Split-Path $Ungoogled) | Out-Null
-        git clone --quiet https://github.com/ungoogled-software/ungoogled-chromium.git $Ungoogled
+        Invoke-Git @('clone', '--quiet', 'https://github.com/ungoogled-software/ungoogled-chromium.git', $Ungoogled) "ungoogled clone" | Out-Null
     }
-    git -C $Ungoogled checkout --quiet --detach $UngoogledVersion
+    Invoke-Git @('-C', $Ungoogled, 'checkout', '--quiet', '--detach', $UngoogledVersion) "ungoogled checkout" | Out-Null
     $theirs = (Get-Content (Join-Path $Ungoogled "chromium_version.txt")).Trim()
     if ($theirs -ne $ChromiumVersion) { Fail "ungoogled targets Chromium $theirs, we pin $ChromiumVersion" }
     Write-Info "$((Get-Content (Join-Path $Ungoogled 'patches\series') | Where-Object { $_ -match '\S' }).Count) upstream patches"
@@ -166,8 +178,7 @@ function Stage-Patch {
         foreach ($rel in $ours) {
             $file = Join-Path $Root "patches\$rel"
             if (-not (Test-Path $file)) { Fail "listed in series but missing: $rel" }
-            git -C $Src apply --3way --whitespace=nowarn $file
-            if ($LASTEXITCODE -ne 0) { Fail "patch failed: $rel" }
+            Invoke-Git @('-C', $Src, 'apply', '--3way', '--whitespace=nowarn', $file) "patch $rel" | Out-Null
             Write-Info "$rel ok"
         }
     } else {
